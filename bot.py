@@ -130,6 +130,12 @@ class User:
 
         self.mydict = {}
 
+        self.initial_amount = None
+
+        self.count_correct = None
+
+        self.count_incorrect = None
+
         self.added_words = None
 
 
@@ -218,7 +224,6 @@ def words_message(message):
     bot.send_message(message.chat.id, "1. /learnwords изучение слов \U0001F520\n"
                                       "\n2. /addwords добавление слов \U0000270D\n"
                                       "\n3. /repeat повторение слов \U0001F9E0")
-
 
     # команда /developer
 
@@ -491,7 +496,8 @@ def add_word_step(message):
                         current_user.lst.append(check_word)
                         current_user.added_words.remove(item)
     if len(current_user.added_words) == 0:
-        msg = bot.send_message(message.chat.id, "Эти слова уже есть в твоем словаре, добавь что-нибудь новое \U0001F601")
+        msg = bot.send_message(message.chat.id, "Эти слова уже есть в твоем словаре, "
+                                                "добавь что-нибудь новое \U0001F601")
         bot.register_next_step_handler(msg, add_word_step)
         return
     else:
@@ -623,6 +629,9 @@ def repeat(message):
             lst = list(current_user.mydict.items())
             random.shuffle(lst)
             current_user.mydict = dict(lst)
+            current_user.initial_amount = len(current_user.mydict)
+            current_user.count_correct = len(current_user.mydict)
+            current_user.count_incorrect = len(current_user.mydict)
         except TypeError:
             bot.send_message(message.chat.id, "В твоем словаре еще нет слов для повторения \U0001F601\n"
                                               "\nПредлагаю тебе:\n"
@@ -631,23 +640,34 @@ def repeat(message):
                              reply_markup=types.ReplyKeyboardRemove())
             return
     bot.send_message(message.chat.id, "Отлично! Давай повторим слова, добавленные в твой словарь.\n"
-                                      "Твоя задача вспомнить их значение на английском \U0001F60A", reply_markup=keyboard)
+                                      "Твоя задача вспомнить их значение на английском \U0001F60A",
+                     reply_markup=keyboard)
     print(current_user.mydict)
 
     def repeat_step(message):
         word = message.text
         for x in current_user.mydict:
             if word.lower().strip() == x:
+                current_user.count_correct -= 1
                 bot.send_message(message.chat.id, 'Good job \U0001F44D')
                 del current_user.mydict[x]
                 break
             elif word == 'Остановить повторение \U0001F3C1':
-                bot.send_message(message.chat.id, f'Хорошо, ты можешь в любое время вернуться сюда \U0001F44B',
-                                 reply_markup=types.ReplyKeyboardRemove())
+                bot.send_message(message.chat.id, f'Ты повторил '
+                                                  f'*{current_user.initial_amount-len(current_user.mydict)}* '
+                                                  f'слов(а) из твоего словаря!\n'
+                                                  f'\n\U00002705 Правильных переводов: '
+                                                  f'*{current_user.initial_amount-current_user.count_correct}*\n'
+                                                  f'\n\U0000274E Кол-во не переведенных слов: '
+                                                  f'*{current_user.initial_amount-current_user.count_incorrect}*\n'
+                                                  f'\n\U0001F4DA Всего слов в твоем словаре: '
+                                                  f'*{current_user.initial_amount}*',
+                                 parse_mode='Markdown', reply_markup=types.ReplyKeyboardRemove())
                 return
             elif word == 'Показать значение \U0001F914':
+                current_user.count_incorrect -= 1
                 for value in current_user.mydict.keys():
-                    bot.send_message(message.chat.id, f'*{value.title()}*', parse_mode='Markdown')
+                    bot.send_message(message.chat.id, f'*{value.title()}*!', parse_mode='Markdown')
                     break
                 for key in current_user.mydict.keys():
                     del current_user.mydict[key]
@@ -660,15 +680,22 @@ def repeat(message):
 
         if len(current_user.mydict) != 0:
             for z in current_user.mydict.values():
-                a = bot.send_message(message.chat.id, f"Переведи слово: *{z.upper()}*", parse_mode='Markdown')
+                a = bot.send_message(message.chat.id, f"\n\U0001F4D6 *{z.upper()}*", parse_mode='Markdown')
                 bot.register_next_step_handler(a, repeat_step)
                 break
         else:
-            bot.send_message(message.chat.id, "Ты повторил все слова, молодец!", reply_markup=types.ReplyKeyboardRemove())
+            bot.send_message(message.chat.id, f'Ты повторил *все* слова из твоего словаря, молодец! \U0001F44D\n'
+                                              f'\n\U00002705 Правильных переводов: '
+                                              f'*{current_user.initial_amount - current_user.count_correct}*\n'
+                                              f'\n\U0000274E Кол-во не переведенных слов: '
+                                              f'*{current_user.initial_amount - current_user.count_incorrect}*\n'
+                                              f'\n\U0001F4DA Всего слов в твоем словаре: '
+                                              f'*{current_user.initial_amount}*',
+                             parse_mode='Markdown', reply_markup=types.ReplyKeyboardRemove())
             return
 
     for i in current_user.mydict.values():
-        a = bot.send_message(message.chat.id, f"Переведи слово: *{i.upper()}*", parse_mode='Markdown')
+        a = bot.send_message(message.chat.id, f"Переведи слово:\n\n\U0001F4D6 *{i.upper()}*", parse_mode='Markdown')
         bot.register_next_step_handler(a, repeat_step)
         break
 
