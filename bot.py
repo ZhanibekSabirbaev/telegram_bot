@@ -550,7 +550,10 @@ def learn_words(message):
         if word == "Я знаю это \U0001F60E":
             bot.send_message(message.chat.id, 'Ладно, едем дальше \U0001F44D')
             for x in cursor:
-                a = bot.send_message(message.chat.id, f"\U0001F4D6 *{x[1].upper()}* - {x[2]}", parse_mode='Markdown')
+                bot.send_message(message.chat.id, f"\U0001F4D6 *{x[1].upper()}* - {x[2]}", parse_mode='Markdown')
+                audio = open(rf'D:/Projects/words/{x[1].lower()}.ogg', 'rb')
+                a = bot.send_audio(message.from_user.id, audio)
+                audio.close()
                 bot.register_next_step_handler(a, learn_step)
                 del current_user.lst[0]
                 del current_user.lst[0]
@@ -575,8 +578,11 @@ def learn_words(message):
                 mydb.commit()
                 bot.send_message(message.chat.id, "Я добавил это в твой словарь! \U0001F609")
                 for x in cursor:
-                    a = bot.send_message(message.chat.id, f"\U0001F4D6 *{x[1].upper()}* - {x[2]}",
+                    bot.send_message(message.chat.id, f"\U0001F4D6 *{x[1].upper()}* - {x[2]}",
                                          parse_mode='Markdown')
+                    audio = open(rf'D:/Projects/words/{x[1].lower()}.ogg', 'rb')
+                    a = bot.send_audio(message.from_user.id, audio)
+                    audio.close()
                     bot.register_next_step_handler(a, learn_step)
                     del current_user.lst[0]
                     del current_user.lst[0]
@@ -586,8 +592,10 @@ def learn_words(message):
             except KeyError:
                 bot.send_message(message.chat.id, "Это слово уже есть в твоем словаре!")
                 for x in cursor:
-                    a = bot.send_message(message.chat.id, f"\U0001F4D6 *{x[1].upper()}* - {x[2]}",
-                                         parse_mode='Markdown')
+                    bot.send_message(message.chat.id, f"\U0001F4D6 *{x[1].upper()}* - {x[2]}", parse_mode='Markdown')
+                    audio = open(rf'D:/Projects/words/{x[1].lower()}.ogg', 'rb')
+                    a = bot.send_audio(message.from_user.id, audio)
+                    audio.close()
                     bot.register_next_step_handler(a, learn_step)
                     del current_user.lst[0]
                     del current_user.lst[0]
@@ -601,8 +609,11 @@ def learn_words(message):
             return
     for x in cursor:
         bot.send_message(message.chat.id, "Let's go!")
-        a = bot.send_message(message.chat.id, f"\U0001F4D6 *{x[1].upper()}* - {x[2]}", parse_mode='Markdown',
-                             reply_markup=keyboard)
+        bot.send_message(message.chat.id, f"\U0001F4D6 *{x[1].upper()}* - {x[2]}", parse_mode='Markdown',
+                         reply_markup=keyboard)
+        audio = open(rf'D:/Projects/words/{x[1].lower()}.ogg', 'rb')
+        a = bot.send_audio(message.from_user.id, audio)
+        audio.close()
         bot.register_next_step_handler(a, learn_step)
         current_user.lst.append(x[1])
         current_user.lst.append(x[2])
@@ -667,8 +678,14 @@ def repeat(message):
             elif word == 'Показать значение \U0001F914':
                 current_user.count_incorrect -= 1
                 for value in current_user.mydict.keys():
-                    bot.send_message(message.chat.id, f'*{value.title()}*!', parse_mode='Markdown')
-                    break
+                    bot.send_message(message.chat.id, f'*{value.title()}*', parse_mode='Markdown')
+                    try:
+                        audio = open(rf'D:/Projects/words/{value.lower()}.ogg', 'rb')
+                        bot.send_audio(message.from_user.id, audio)
+                        audio.close()
+                        break
+                    except FileNotFoundError:
+                        break
                 for key in current_user.mydict.keys():
                     del current_user.mydict[key]
                     break
@@ -680,7 +697,8 @@ def repeat(message):
 
         if len(current_user.mydict) != 0:
             for z in current_user.mydict.values():
-                a = bot.send_message(message.chat.id, f"\n\U0001F4D6 *{z.upper()}*", parse_mode='Markdown')
+                a = bot.send_message(message.chat.id, f"Переведи слово:"
+                                                      f"\n\U0001F4D6 *{z.upper()}*", parse_mode='Markdown')
                 bot.register_next_step_handler(a, repeat_step)
                 break
         else:
@@ -695,7 +713,7 @@ def repeat(message):
             return
 
     for i in current_user.mydict.values():
-        a = bot.send_message(message.chat.id, f"Переведи слово:\n\n\U0001F4D6 *{i.upper()}*", parse_mode='Markdown')
+        a = bot.send_message(message.chat.id, f"Переведи слово:\n\U0001F4D6 *{i.upper()}*", parse_mode='Markdown')
         bot.register_next_step_handler(a, repeat_step)
         break
 
