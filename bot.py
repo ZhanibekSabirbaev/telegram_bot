@@ -170,8 +170,7 @@ def help_message(message):
     bot.send_message(message.chat.id, "1. /translate поможет тебе перевести слова \U0001F4DA\n"
                                       "\n2. /grammar поможет тебе в изучении грамматики \U0001F4D6\n"
                                       "\n3. /words изучение, добавление и повторение слов \U0001F393\n"
-                                      "\n4. /talk общение на английском \U0001F4AC\n"
-                                      "\n5. /developer расскажет тебе о разработчике \U0001F466\n")
+                                      "\n4. /developer расскажет тебе о разработчике \U0001F466\n")
 
     # команда /grammar
 
@@ -223,34 +222,28 @@ def translate(message):
 def words_message(message):
     bot.send_message(message.chat.id, "1. /learnwords изучение слов \U0001F520\n"
                                       "\n2. /addwords добавление слов \U0000270D\n"
-                                      "\n3. /repeat повторение слов \U0001F9E0")
+                                      "\n3. /repeat повторение слов \U0001F9E0\n"
+                                      "\n4. /more работа со словарем \U0001F6E0")
 
-    # команда /developer
+# команда /more предназначена для работы со словарем. Используя эту команду можно удалять слова из словаря
+# или же очистить весь словарь полностью
+
+
+@bot.message_handler(commands=['more'])
+def more(message):
+    inline_button_del = types.InlineKeyboardButton('Удалить слово из словаря', callback_data='del')
+    inline_button_clear = types.InlineKeyboardButton('Очистить мой словарь', callback_data='clear')
+    inline_keyboard = types.InlineKeyboardMarkup().add(inline_button_del).add(inline_button_clear)
+    bot.send_message(message.chat.id, "*Удалить слово из словаря* - удаление какого-либо слова из твоего словаря\n"
+                                      "*\nОчистить мой словарь* - удаление всех слов из твоего словаря",
+                     parse_mode="Markdown", reply_markup=inline_keyboard)
+
+# команда /developer
 
 
 @bot.message_handler(commands=['developer'])
 def start_message(message):
     bot.send_message(message.chat.id, "Разработчик этого бота - студент группы ИС-1705, Сабирбаев Жанибек")
-
-    # команда /talk (При вызове команды начнется общение с ботом)
-
-
-@bot.message_handler(commands=['talk'])
-def dictionary_message(message):
-    msg = bot.send_message(message.chat.id, "hello, lets talk")
-    bot.register_next_step_handler(msg, talk_step)
-
-
-def talk_step(message):
-    word = message.text
-    if word.lower() == 'hello':
-        a = bot.send_message(message.chat.id, "How are you?")
-        bot.register_next_step_handler(a, talk_step)
-    elif word.lower() == 'good':
-        b = bot.send_message(message.chat.id, 'Ok')
-        bot.register_next_step_handler(b, talk_step)
-    elif word.lower() == 'bye':
-        bot.send_message(message.chat.id, 'ок')
 
 # команда /verbtences(при вызове команды появятся кнопки для выбора времен глаголов)
 
@@ -407,6 +400,71 @@ def answer(call):
         bot.send_message(call.message.chat.id, "Список времен глагола: /verbtences")
     elif call.data == 'verb1' or call.data == 'verb2' or call.data == 'verb3':
         bot.answer_callback_query(call.id, text="Выбери любое время глагола")
+    elif call.data == 'del':
+        cursor = mydb.cursor(buffered=True)
+        cursor.execute(f'select dict from userwords where user_id = {call.message.chat.id}')
+        for x in cursor:
+            if x[0] is None:
+                bot.send_message(call.message.chat.id, "В твоем словаре еще нет слов \U0001F601\n"
+                                                       "\nПредлагаю тебе:\n"
+                                                       "\n1. /learnwords - изучить новые слова\n"
+                                                       "\n2. /addwords - добавить свои слова")
+                return
+            else:
+                def user_message(message):
+                    current_user = User(message.chat.id)
+                    cursor2 = mydb.cursor(buffered=True)
+                    cursor2.execute(f'select dict from userwords where user_id = {current_user.user_id}')
+                    for item in cursor2:
+                        try:
+                            current_user.mydict = json.loads(item[0])
+                        except Exception as error:
+                            bot.send_message(call.message.chat.id, f'{error}')
+                            return
+                    word = message.text
+                    for item in current_user.mydict.keys():
+                        if word == item:
+                            del current_user.mydict[item]
+                            current_user.mydict = json.dumps(current_user.mydict, ensure_ascii=False)
+                            sql = f"UPDATE userwords SET dict=%s WHERE user_id={current_user.user_id}"
+                            val = (current_user.mydict,)
+                            cursor2.execute(sql, val)
+                            mydb.commit()
+                            bot.send_message(call.message.chat.id, f'Слово «*{item}*» удалено из '
+                                                                   f'твоего словаря \U0001F642',
+                                             parse_mode='Markdown')
+                            return
+                    bot.send_message(message.chat.id, "В твоем словаре нет такого слова \U0001F440")
+                    return
+                a = bot.send_message(call.message.chat.id, 'Введи слово, которое хочешь удалить')
+                bot.register_next_step_handler(a, user_message)
+    elif call.data == 'clear':
+        cursor = mydb.cursor(buffered=True)
+        cursor.execute(f'select dict from userwords where user_id = {call.message.chat.id}')
+        for x in cursor:
+            if x[0] is None:
+                bot.send_message(call.message.chat.id, "В твоем словаре еще нет слов \U0001F601\n"
+                                                       "\nПредлагаю тебе:\n"
+                                                       "\n1. /learnwords - изучить новые слова\n"
+                                                       "\n2. /addwords - добавить свои слова")
+                return
+            else:
+                def user_message(message):
+                    word = message.text
+                    if word.lower() == 'да':
+                        cursor2 = mydb.cursor(buffered=True)
+                        sql = f"UPDATE userwords SET dict=null WHERE user_id={message.chat.id}"
+                        cursor2.execute(sql)
+                        mydb.commit()
+                        bot.send_message(message.chat.id, "Все твои слова удалены из словаря\U00002757")
+                        return
+                    else:
+                        bot.send_message(message.chat.id, 'Действие отменено \U0001F609')
+                        return
+                a = bot.send_message(call.message.chat.id, "Ты действительно хочешь удалить все "
+                                                           "слова из твоего словаря?\n"
+                                                           "\n*Да* / *Нет*", parse_mode='Markdown')
+                bot.register_next_step_handler(a, user_message)
 
 
 # команда /adverbs(при вызове команды пользователю отправляется небольшое сообщение о наречиях
