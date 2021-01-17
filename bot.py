@@ -13,112 +13,146 @@ bot = telebot.TeleBot(config.TG_TOKEN)
 
 kirill = 'абвгдеёжзийклмнопрстуфпхцчшщъыьэюя.,-+=!"№;%:?*()_<>`~'
 
-mydb = config.DB_CONFIG
 
-cursor = mydb.cursor(buffered=True)
+class Db:
+    my_db = None
+
+    def connect(self):
+        self.my_db = config.DB_CONFIG
+
+    def query(self, sql):
+        try:
+            cursor = self.my_db.cursor(buffered=True)
+            cursor.execute(sql)
+        except(AttributeError, config.MYSQL_OPERATIONAL_ERROR):
+            self.connect()
+            cursor = self.my_db.cursor(buffered=True)
+            cursor.execute(sql)
+        return cursor
+
+    def query_val(self, sql, val):
+        try:
+            cursor = self.my_db.cursor(buffered=True)
+            cursor.execute(sql, val)
+        except(AttributeError, config.MYSQL_OPERATIONAL_ERROR):
+            self.connect()
+            cursor = self.my_db.cursor(buffered=True)
+            cursor.execute(sql, val)
+        return cursor
+
 
 try:
-
     # Извлекаю данные о Past Simple с БД и присваиваю эти данные к переменной pastsimple
-
-    cursor.execute("SELECT PastSimple FROM verbtences")
-    for past_simple in cursor:
+    db = Db()
+    sql = "SELECT PastSimple FROM verbtences"
+    cur = db.query(sql)
+    for past_simple in cur:
         pastsimple = past_simple[0]
     print("Информация о Past Simple доступна")
 
     # Извлекаю данные о Present Simple с БД и присваиваю эти данные к переменной presentsimple
-
-    cursor.execute("SELECT PresentSimple FROM verbtences")
-    for present_simple in cursor:
+    sql = "SELECT PresentSimple FROM verbtences"
+    cur = db.query(sql)
+    for present_simple in cur:
         presentsimple = present_simple[0]
     print("Информация о Present Simple доступна")
 
     # Извлекаю данные о Future Simple с БД и присваиваю эти данные к переменной futuresimple
-
-    cursor.execute("SELECT FutureSimple FROM verbtences")
-    for future_simple in cursor:
+    sql = "SELECT FutureSimple FROM verbtences"
+    cur = db.query(sql)
+    for future_simple in cur:
         futuresimple = future_simple[0]
     print("Информация о Future Simple доступна")
 
     # Извлекаю данные о Past Continuous с БД и присваиваю эти данные к переменной pastcontinuous
-
-    cursor.execute("SELECT PastContinuous FROM verbtences")
-    for past_continuous in cursor:
+    sql = "SELECT PastContinuous FROM verbtences"
+    cur = db.query(sql)
+    for past_continuous in cur:
         pastcontinuous = past_continuous[0]
     print("Информация о Past Continuous доступна")
 
     # Извлекаю данные о Present Continuous с БД и присваиваю эти данные к переменной presentcontinuous
 
-    cursor.execute("SELECT PresentContinuous FROM verbtences")
-    for present_continuous in cursor:
+    sql = "SELECT PresentContinuous FROM verbtences"
+    cur = db.query(sql)
+    for present_continuous in cur:
         presentcontinuous = present_continuous[0]
-        print("Информация о Present Continuous доступна")
+    print("Информация о Present Continuous доступна")
 
     # Извлекаю данные о Future Continuous с БД и присваиваю эти данные к переменной futurecontinuous
 
-    cursor.execute("SELECT FutureContinuous FROM verbtences")
-    for future_continuous in cursor:
+    sql = "SELECT FutureContinuous FROM verbtences"
+    cur = db.query(sql)
+    for future_continuous in cur:
         futurecontinuous = future_continuous[0]
-        print("Информация о Future Continuous доступна")
+    print("Информация о Future Continuous доступна")
 
     # Извлекаю данные о Past Perfect с БД и присваиваю эти данные к переменной pastperfect
 
-    cursor.execute("SELECT PastPerfect FROM verbtences")
-    for past_perfect in cursor:
+    sql = "SELECT PastPerfect FROM verbtences"
+    cur = db.query(sql)
+    for past_perfect in cur:
         pastperfect = past_perfect[0]
-        print("Информация о Past Perfect доступна")
+    print("Информация о Past Perfect доступна")
 
     # Извлекаю данные о Present Perfect с БД и присваиваю эти данные к переменной presentperfect
 
-    cursor.execute("SELECT PresentPerfect FROM verbtences")
-    for present_perfect in cursor:
+    sql = "SELECT PresentPerfect FROM verbtences"
+    cur = db.query(sql)
+    for present_perfect in cur:
         presentperfect = present_perfect[0]
-        print("Информация о Present Perfect доступна")
+    print("Информация о Present Perfect доступна")
 
     # Извлекаю данные о Future Perfect с БД и присваиваю эти данные к переменной futureperfect
 
-    cursor.execute("SELECT FuturePerfect FROM verbtences")
-    for future_perfect in cursor:
+    sql = "SELECT FuturePerfect FROM verbtences"
+    cur = db.query(sql)
+    for future_perfect in cur:
         futureperfect = future_perfect[0]
-        print("Информация о Future Perfect доступна")
+    print("Информация о Future Perfect доступна")
 
     # Извлекаю данные о Past Perfect Continuous с БД и присваиваю эти данные к переменной pastperfectcontinuous
 
-    cursor.execute("SELECT PastPerfectContinuous FROM verbtences")
-    for past_perfect_continuous in cursor:
+    sql = "SELECT PastPerfectContinuous FROM verbtences"
+    cur = db.query(sql)
+    for past_perfect_continuous in cur:
         pastperfectcontinuous = past_perfect_continuous[0]
-        print("Информация о Past Perfect Continuous доступна")
+    print("Информация о Past Perfect Continuous доступна")
 
     # Извлекаю данные о Present Perfect Continuous с БД и присваиваю эти данные к переменной presentperfectcontinuous
 
-    cursor.execute("SELECT PresentPerfectContinuous FROM verbtences")
-    for present_perfect_continuous in cursor:
+    sql = "SELECT PresentPerfectContinuous FROM verbtences"
+    cur = db.query(sql)
+    for present_perfect_continuous in cur:
         presentperfectcontinuous = present_perfect_continuous[0]
-        print("Информация о Present Perfect Continuous доступна")
+    print("Информация о Present Perfect Continuous доступна")
 
     # Извлекаю данные о Future Perfect Continuous с БД и присваиваю эти данные к переменной futureperfectcontinuous
 
-    cursor.execute("SELECT FuturePerfectContinuous FROM verbtences")
-    for future_perfect_continuous in cursor:
+    sql = "SELECT FuturePerfectContinuous FROM verbtences"
+    cur = db.query(sql)
+    for future_perfect_continuous in cur:
         futureperfectcontinuous = future_perfect_continuous[0]
-        print("Информация о Future Perfect Continuous доступна")
+    print("Информация о Future Perfect Continuous доступна")
 
     # Извлекаю данные об Adverbs с БД и присваиваю эти данные к переменной adverb
 
-    cursor.execute("SELECT adverb FROM grammar")
-    for adverbs in cursor:
+    sql = "SELECT adverb FROM grammar"
+    cur = db.query(sql)
+    for adverbs in cur:
         adverb = adverbs[0]
-        print("Информация об adverbs доступна")
+    print("Информация об adverbs доступна")
 
     # Извлекаю данные об Adverbs с БД и присваиваю эти данные к переменной adverb
 
-    cursor.execute("SELECT adjective FROM grammar")
-    for adjectives in cursor:
+    sql = "SELECT adjective FROM grammar"
+    cur = db.query(sql)
+    for adjectives in cur:
         adjective = adjectives[0]
-        print("Информация об adjectives доступна")
+    print("Информация об adjectives доступна")
 
-finally:
-    cursor.close()
+except Exception as err:
+    print(err)
 
 
 class User:
@@ -129,6 +163,12 @@ class User:
         self.lst = []
 
         self.mydict = {}
+
+        self.db = Db()
+
+        self.cur = None
+
+        self.cur1 = None
 
         self.initial_amount = None
 
@@ -146,23 +186,22 @@ current_user = None
 
 @bot.message_handler(commands=['start'])
 def start_message(message):
+    current_user = User(message.chat.id)
     try:
-        cursor = mydb.cursor(buffered=True)
-        sql = 'INSERT INTO userwords (user_id) VALUES (%s)'
-        val = (message.chat.id,)
-        cursor.execute(sql, val)
-        mydb.commit()
+        sql = f'INSERT INTO userwords (user_id) VALUES ({current_user.user_id})'
+        current_user.db.query(sql)
+        current_user.db.my_db.commit()
         bot.send_message(message.chat.id, f'Привет, {message.from_user.first_name} \U0001F642 \n'
                                           'Я бот-помощник для изучения английского языка!\n'
                                           'Для получения информации нажми /help')
-    except config.MYSQL_ERROR:
-        cursor = mydb.cursor(buffered=True)
+    except config.MYSQL_INTEGRITY_ERROR:
         bot.send_message(message.chat.id, "С возвращением! \U0001F601\n"
                                           "Воспользуйся командой /help")
-        cursor.execute('alter table userwords auto_increment=1')
-        mydb.commit()
+        sql = 'alter table userwords auto_increment=1'
+        current_user.db.query(sql)
+        current_user.db.my_db.commit()
 
-    # команда /help
+# команда /help
 
 
 @bot.message_handler(commands=['help'])
@@ -172,7 +211,7 @@ def help_message(message):
                                       "\n3. /words изучение, добавление и повторение слов \U0001F393\n"
                                       "\n4. /developer расскажет тебе о разработчике \U0001F466\n")
 
-    # команда /grammar
+# команда /grammar
 
 
 @bot.message_handler(commands=['grammar'])
@@ -182,7 +221,7 @@ def grammar_message(message):
                                       "\n2. *Наречия*  /adverbs\n"
                                       "\n3. *Прилагательные*  /adjectives", parse_mode='Markdown')
 
-    # команда /translate (при вызове команды предложится ввести слово для перевода)
+# команда /translate (при вызове команды предложится ввести слово для перевода)
 
 
 @bot.message_handler(commands=['translate'])
@@ -203,13 +242,13 @@ def translate(message):
             for x in word:
                 if x.lower() in kirill:
                     bot.send_message(message.chat.id, f"Перевод: *"
-                                                      f"{translator.translate(word, src='ru', dest='en').text.title()}*",
-                                     parse_mode='Markdown')
+                                                      f"{translator.translate(word, src='ru', dest='en').text}"
+                                                      f"*", parse_mode='Markdown')
                     break
                 else:
                     bot.send_message(message.chat.id, f"Перевод: *"
-                                                      f"{translator.translate(word, src='en', dest='ru', ).text.title()}*",
-                                     parse_mode='Markdown')
+                                                      f"{translator.translate(word, src='en', dest='ru',).text}"
+                                                      f"*", parse_mode='Markdown')
                     break
             a = bot.send_message(message.chat.id, "Введи новое слово")
             bot.register_next_step_handler(a, translate)
@@ -401,9 +440,10 @@ def answer(call):
     elif call.data == 'verb1' or call.data == 'verb2' or call.data == 'verb3':
         bot.answer_callback_query(call.id, text="Выбери любое время глагола")
     elif call.data == 'del':
-        cursor = mydb.cursor(buffered=True)
-        cursor.execute(f'select dict from userwords where user_id = {call.message.chat.id}')
-        for x in cursor:
+        current_user = User(call.message.chat.id)
+        sql = f'select dict from userwords where user_id = {call.message.chat.id}'
+        current_user.cur = current_user.db.query(sql)
+        for x in current_user.cur:
             if x[0] is None:
                 bot.send_message(call.message.chat.id, "В твоем словаре еще нет слов \U0001F601\n"
                                                        "\nПредлагаю тебе:\n"
@@ -413,9 +453,9 @@ def answer(call):
             else:
                 def user_message(message):
                     current_user = User(message.chat.id)
-                    cursor2 = mydb.cursor(buffered=True)
-                    cursor2.execute(f'select dict from userwords where user_id = {current_user.user_id}')
-                    for item in cursor2:
+                    sql = f'select dict from userwords where user_id = {current_user.user_id}'
+                    current_user.cur = current_user.db.query(sql)
+                    for item in current_user.cur:
                         try:
                             current_user.mydict = json.loads(item[0])
                         except Exception as error:
@@ -427,9 +467,9 @@ def answer(call):
                             del current_user.mydict[item]
                             current_user.mydict = json.dumps(current_user.mydict, ensure_ascii=False)
                             sql = f"UPDATE userwords SET dict=%s WHERE user_id={current_user.user_id}"
-                            val = (current_user.mydict,)
-                            cursor2.execute(sql, val)
-                            mydb.commit()
+                            val = (current_user.mydict, )
+                            current_user.db.query_val(sql, val)
+                            current_user.db.my_db.commit()
                             bot.send_message(call.message.chat.id, f'Слово «*{item}*» удалено из '
                                                                    f'твоего словаря \U0001F642',
                                              parse_mode='Markdown')
@@ -439,9 +479,10 @@ def answer(call):
                 a = bot.send_message(call.message.chat.id, 'Введи слово, которое хочешь удалить')
                 bot.register_next_step_handler(a, user_message)
     elif call.data == 'clear':
-        cursor = mydb.cursor(buffered=True)
-        cursor.execute(f'select dict from userwords where user_id = {call.message.chat.id}')
-        for x in cursor:
+        current_user = User(call.message.chat.id)
+        sql = f'select dict from userwords where user_id = {call.message.chat.id}'
+        current_user.cur = current_user.db.query(sql)
+        for x in current_user.cur:
             if x[0] is None:
                 bot.send_message(call.message.chat.id, "В твоем словаре еще нет слов \U0001F601\n"
                                                        "\nПредлагаю тебе:\n"
@@ -452,10 +493,9 @@ def answer(call):
                 def user_message(message):
                     word = message.text
                     if word.lower() == 'да':
-                        cursor2 = mydb.cursor(buffered=True)
                         sql = f"UPDATE userwords SET dict=null WHERE user_id={message.chat.id}"
-                        cursor2.execute(sql)
-                        mydb.commit()
+                        current_user.db.query(sql)
+                        current_user.db.my_db.commit()
                         bot.send_message(message.chat.id, "Все твои слова удалены из словаря\U00002757")
                         return
                     else:
@@ -523,8 +563,6 @@ def add_word(message):
 
 
 def add_word_step(message):
-
-    cursor = mydb.cursor(buffered=True)
     word = message.text
     if word == 'Отменить добавление':
         bot.send_message(message.chat.id, f"Хорошо, {message.from_user.first_name} \U0001F642,"
@@ -541,10 +579,10 @@ def add_word_step(message):
                                      parse_mode='Markdown')
                 bot.register_next_step_handler(a, add_word_step)
                 return
-
-    cursor.execute(f"SELECT dict FROM userwords where user_id = {current_user.user_id}")
-    for user_dict in cursor:
-        if user_dict[0] == None:
+    sql = f"SELECT dict FROM userwords where user_id = {current_user.user_id}"
+    current_user.cur = current_user.db.query(sql)
+    for user_dict in current_user.cur:
+        if user_dict[0] is None:
             break
         else:
             current_user.mydict = json.loads(user_dict[0])
@@ -563,12 +601,11 @@ def add_word_step(message):
             for words in current_user.added_words:
                 current_user.mydict.update({words.split('-')[0].strip().lower(): words.split('-')[1].strip().lower()})
             current_user.mydict = json.dumps(current_user.mydict, ensure_ascii=False)
-            cursor = mydb.cursor(buffered=True)
             sql = f"UPDATE userwords SET dict=%s WHERE user_id={current_user.user_id}"
-            val = (current_user.mydict,)
-            cursor.execute(sql, val)
-            mydb.commit()
-        except IndexError:
+            val = (current_user.mydict, )
+            current_user.db.query_val(sql, val)
+            current_user.db.my_db.commit()
+        except Exception:
             a = bot.send_message(message.chat.id, 'Введи слово в формате *СЛОВО-ПЕРЕВОД*\n'
                                                   '\nНапример \U0001F447\n'
                                                   '\nfriend - друг', parse_mode='Markdown')
@@ -597,17 +634,16 @@ def learn_words(message):
     keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=2)\
         .row(button_know, button_learn).add(button_bye)
     current_user = User(message.chat.id)
-
-    cursor = mydb.cursor(buffered=True)
-    cursor.execute("SELECT * FROM dictionary order by rand()")
+    sql = "SELECT * FROM dictionary order by rand()"
+    current_user.cur = current_user.db.query(sql)
 
     def learn_step(message):
         word = message.text
-        cursor = mydb.cursor(buffered=True)
-        cursor.execute("SELECT * FROM dictionary order by rand()")
+        sql = "SELECT * FROM dictionary order by rand()"
+        current_user.cur = current_user.db.query(sql)
         if word == "Я знаю это \U0001F60E":
             bot.send_message(message.chat.id, 'Ладно, едем дальше \U0001F44D')
-            for x in cursor:
+            for x in current_user.cur:
                 bot.send_message(message.chat.id, f"\U0001F4D6 *{x[1].upper()}* - {x[2]}", parse_mode='Markdown')
                 audio = open(rf'D:/Projects/words/{x[1].lower()}.ogg', 'rb')
                 a = bot.send_audio(message.from_user.id, audio)
@@ -620,9 +656,9 @@ def learn_words(message):
                 print(current_user.lst)
                 break
         elif word == "Изучить \U00002705":
-            cursor2 = mydb.cursor(buffered=True)
-            cursor2.execute(f"SELECT dict FROM userwords where user_id = {current_user.user_id}")
-            for user_dict in cursor2:
+            sql = f"SELECT dict FROM userwords where user_id = {current_user.user_id}"
+            current_user.cur1 = current_user.db.query(sql)
+            for user_dict in current_user.cur1:
                 try:
                     current_user.mydict = json.loads(user_dict[0])
                 except TypeError:
@@ -632,12 +668,11 @@ def learn_words(message):
                 current_user.mydict = json.dumps(current_user.mydict, ensure_ascii=False)
                 sql = f"UPDATE userwords SET dict=%s WHERE user_id={current_user.user_id}"
                 val = (current_user.mydict,)
-                cursor2.execute(sql, val)
-                mydb.commit()
+                current_user.db.query_val(sql, val)
+                current_user.db.my_db.commit()
                 bot.send_message(message.chat.id, "Я добавил это в твой словарь! \U0001F609")
-                for x in cursor:
-                    bot.send_message(message.chat.id, f"\U0001F4D6 *{x[1].upper()}* - {x[2]}",
-                                         parse_mode='Markdown')
+                for x in current_user.cur:
+                    bot.send_message(message.chat.id, f"\U0001F4D6 *{x[1].upper()}* - {x[2]}", parse_mode='Markdown')
                     audio = open(rf'D:/Projects/words/{x[1].lower()}.ogg', 'rb')
                     a = bot.send_audio(message.from_user.id, audio)
                     audio.close()
@@ -649,7 +684,7 @@ def learn_words(message):
                     break
             except KeyError:
                 bot.send_message(message.chat.id, "Это слово уже есть в твоем словаре!")
-                for x in cursor:
+                for x in current_user.cur:
                     bot.send_message(message.chat.id, f"\U0001F4D6 *{x[1].upper()}* - {x[2]}", parse_mode='Markdown')
                     audio = open(rf'D:/Projects/words/{x[1].lower()}.ogg', 'rb')
                     a = bot.send_audio(message.from_user.id, audio)
@@ -665,7 +700,7 @@ def learn_words(message):
             del current_user.lst[0]
             bot.send_message(message.chat.id, f'Okay, до скорого! \U0001F60A', reply_markup=types.ReplyKeyboardRemove())
             return
-    for x in cursor:
+    for x in current_user.cur:
         bot.send_message(message.chat.id, "Let's go!")
         bot.send_message(message.chat.id, f"\U0001F4D6 *{x[1].upper()}* - {x[2]}", parse_mode='Markdown',
                          reply_markup=keyboard)
@@ -690,9 +725,9 @@ def repeat(message):
     if message.text == "Остановить повторение \U0001F3C1":
         return
     current_user = User(message.chat.id)
-    cursor = mydb.cursor(buffered=True)
-    cursor.execute(f"SELECT dict FROM userwords where user_id = {current_user.user_id}")
-    for x in cursor:
+    sql = f"SELECT dict FROM userwords where user_id = {current_user.user_id}"
+    current_user.cur = current_user.db.query(sql)
+    for x in current_user.cur:
         try:
             current_user.mydict = json.loads(x[0])
             lst = list(current_user.mydict.items())
