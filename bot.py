@@ -4,6 +4,7 @@ from telebot import types
 from googletrans import Translator
 import json
 import random
+import time
 translator = Translator()
 
 print((translator.translate("All okay", src="en", dest="ru")).text)
@@ -13,6 +14,7 @@ bot = telebot.TeleBot(config.TG_TOKEN)
 
 kirill = 'абвгдеёжзийклмнопрстуфпхцчшщъыьэюя.,-+=!"№;%:?*()_<>`~'
 
+play_dict = {'\U0001F4F1': 'mobile phone', '\U0001F3B8': 'guitar'}
 
 class Db:
     my_db = None
@@ -191,10 +193,14 @@ def start_message(message):
         sql = f'INSERT INTO userwords (user_id) VALUES ({current_user.user_id})'
         current_user.db.query(sql)
         current_user.db.my_db.commit()
+        bot.send_chat_action(message.chat.id, action='typing')
+        time.sleep(1.2)
         bot.send_message(message.chat.id, f'Привет, {message.from_user.first_name} \U0001F642 \n'
                                           'Я бот-помощник для изучения английского языка!\n'
                                           'Для получения информации нажми /help')
     except config.MYSQL_INTEGRITY_ERROR:
+        bot.send_chat_action(message.chat.id, action='typing')
+        time.sleep(1.2)
         bot.send_message(message.chat.id, "С возвращением! \U0001F601\n"
                                           "Воспользуйся командой /help")
         sql = 'alter table userwords auto_increment=1'
@@ -501,6 +507,8 @@ def answer(call):
                     else:
                         bot.send_message(message.chat.id, 'Действие отменено \U0001F609')
                         return
+                bot.send_chat_action(call.message.chat.id, action='typing')
+                time.sleep(1)
                 a = bot.send_message(call.message.chat.id, "Ты действительно хочешь удалить все "
                                                            "слова из твоего словаря?\n"
                                                            "\n*Да* / *Нет*", parse_mode='Markdown')
@@ -571,8 +579,11 @@ def add_word_step(message):
     current_user = User(message.chat.id)
     current_user.added_words = word.split('\n')
     for value in current_user.added_words:
+        print(value)
         for value1 in value.split('-')[0]:
             if value1 in kirill:
+                bot.send_chat_action(message.chat.id, action='typing')
+                time.sleep(1)
                 a = bot.send_message(message.chat.id, f"Ошибка в слове «*{value.split('-')[0].strip()}*»\n "
                                                       f"\nСлово должно быть английское!\n"
                                                       f"Ты можешь отправить всё заново в исправленном виде \U0001F609",
@@ -588,10 +599,12 @@ def add_word_step(message):
             current_user.mydict = json.loads(user_dict[0])
             for check_word in current_user.mydict.keys():
                 for item in current_user.added_words:
-                    if check_word in item:
+                    if check_word == item.split('-')[0].strip():
                         current_user.lst.append(check_word)
                         current_user.added_words.remove(item)
     if len(current_user.added_words) == 0:
+        bot.send_chat_action(message.chat.id, action='typing')
+        time.sleep(1)
         msg = bot.send_message(message.chat.id, "Эти слова уже есть в твоем словаре, "
                                                 "добавь что-нибудь новое \U0001F601")
         bot.register_next_step_handler(msg, add_word_step)
@@ -617,8 +630,12 @@ def add_word_step(message):
                          reply_markup=types.ReplyKeyboardRemove())
         return
     else:
+        bot.send_chat_action(message.chat.id, action='typing')
+        time.sleep(1)
         bot.send_message(message.chat.id, f'Некоторые слова (*{", ".join(current_user.lst)}*) уже есть в твоем словаре.'
                                           f' Они не будут добавлены повторно!', parse_mode='Markdown')
+        bot.send_chat_action(message.chat.id, action='typing')
+        time.sleep(2)
         bot.send_message(message.chat.id, 'Остальные слова успешно добавлены в твой словарь! \U00002705',
                          reply_markup=types.ReplyKeyboardRemove())
         return
@@ -701,6 +718,8 @@ def learn_words(message):
             bot.send_message(message.chat.id, f'Okay, до скорого! \U0001F60A', reply_markup=types.ReplyKeyboardRemove())
             return
     for x in current_user.cur:
+        bot.send_chat_action(message.chat.id, action='typing')
+        time.sleep(1)
         bot.send_message(message.chat.id, "Let's go!")
         bot.send_message(message.chat.id, f"\U0001F4D6 *{x[1].upper()}* - {x[2]}", parse_mode='Markdown',
                          reply_markup=keyboard)
@@ -743,6 +762,8 @@ def repeat(message):
                                               "\n2. /addwords - добавить свои слова",
                              reply_markup=types.ReplyKeyboardRemove())
             return
+    bot.send_chat_action(message.chat.id, action='typing')
+    time.sleep(1)
     bot.send_message(message.chat.id, "Отлично! Давай повторим слова, добавленные в твой словарь.\n"
                                       "Твоя задача вспомнить их значение на английском \U0001F60A",
                      reply_markup=keyboard)
